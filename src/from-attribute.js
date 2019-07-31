@@ -61,7 +61,7 @@ ElementAttributeObservable.prototype.handler = function handler (newVal, event) 
 		// adds callback handlers to be called w/i their respective queue.
 		queues.enqueueByQueue.apply(queues, queuesArgs);
 	}
-}
+};
 
 ElementAttributeObservable.prototype.onBound = function onBound() {
 	var observable = this;
@@ -78,7 +78,7 @@ ElementAttributeObservable.prototype.onBound = function onBound() {
 
 	// initial value
 	this._value = this.el.getAttribute(this.prop);
-}
+};
 
 ElementAttributeObservable.prototype.onUnbound = function onUnbound() {
 	var observable = this;
@@ -86,16 +86,16 @@ ElementAttributeObservable.prototype.onUnbound = function onUnbound() {
 	observable.bound = false;
 
 	domEvents.removeEventListener(observable.el, observable.event, observable._handler);
-}
+};
 
 ElementAttributeObservable.prototype.get = function get () {
 	const val = this.el.getAttribute(this.prop);
 	return val;
-}
+};
 ElementAttributeObservable.prototype.set = function set (newVal) {
 	this.el.setAttribute(this.prop, newVal);
 	return newVal;
-}
+};
 
 canReflect.assignSymbols(ElementAttributeObservable.prototype, {
 	"can.isMapLike": false,
@@ -111,4 +111,4 @@ module.exports = function fromAttribute (propertyName) {
 			queue: "domUI"
 		});
 	};
-}
+};
