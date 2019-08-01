@@ -27,3 +27,28 @@ QUnit.test("setting attribute will set property", function(assert) {
 	});
 });
 
+QUnit.test("property does not get set if the attribute does not exist", function(assert) {
+	assert.expect(1);
+	const done = assert.async();
+
+	fixture.innerHTML = "<div id='attr-prop-nexist'></div>";
+	const el = document.getElementById("attr-prop-nexist");
+
+	Object.defineProperty(el, 'lname', {
+		set (v) {
+			console.log(v);
+			assert.ok(false, "Should not be called as attribute does not exist");
+			return v;
+		}
+	});
+
+	const bindFn = fromAttribute('lname');
+	const binding = bindFn(el);
+	binding.start();
+
+	testHelpers.afterMutation(() => {
+		assert.equal(el.lname, undefined, "Should be undefined by default");
+		done();
+	});
+});
+
