@@ -112,19 +112,12 @@ module.exports = function fromAttribute (propertyName) {
 		});
 
 		// This is to prevent canReflect from reading the parent value and setting the child
-		// when the parent / instance doesn't isn't an attribute
-		const oldStart = bind.start;
-		bind.start = function () {
-			// Don't update the child if the attribute does not exist
-			const origUpdateChild = this._updateChild;
-			// create a noop
-			this._updateChild = function() {
-				if (instance.hasAttribute(propertyName)) {
-					origUpdateChild.apply(this, arguments);
-				}
-			};
-
-			oldStart.apply(this, arguments);
+		// when the parent / instance doesn't have an attribute
+		const origUpdateChild = bind._updateChild;
+		bind._updateChild = function() {
+			if (instance.hasAttribute(propertyName)) {
+				origUpdateChild.apply(this, arguments);
+			}
 		};
 
 		return bind;
