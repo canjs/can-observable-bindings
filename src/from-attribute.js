@@ -105,10 +105,28 @@ canReflect.assignSymbols(ElementAttributeObservable.prototype, {
 
 module.exports = function fromAttribute (propertyName) {
 	return function fromAttributeBind (instance) {
-		return new Bind({
+		const bind = new Bind({
 			parent: new ElementAttributeObservable(instance, propertyName, {}, 'attributes'),
 			child: value.to(instance, propertyName),
 			queue: "domUI"
 		});
+
+		// This is to prevent canReflect from reading the parent value and setting the child
+		// when the parent / instance doesn't isn't an attribute
+		const oldStart = bind.start;
+		bind.start = function () {
+			// Don't update the child if the attribute does not exist
+			const origUpdateChild = this._updateChild;
+			// create a noop
+			this._updateChild = function() {
+				if (instance.hasAttribute(propertyName)) {
+					origUpdateChild.apply(this, arguments);
+				}
+			};
+
+			oldStart.apply(this, arguments);
+		};
+
+		return bind;
 	};
 };
