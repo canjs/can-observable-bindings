@@ -39,6 +39,7 @@
   ],
   "license": "MIT",
   "main": "dist/can-observable-bindings.js",
+  "module": "src/can-observable-bindings.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/canjs/can-observable-bindings.git"
