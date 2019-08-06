@@ -1,7 +1,7 @@
 {
   "name": "can-observable-bindings",
   "description": "Observable bindings for use with StacheElement",
-  "version": "1.0.0-pre.1",
+  "version": "1.0.0-pre.2",
   "author": {
     "name": "Bitovi",
     "email": "contact@bitovi.com",
@@ -51,10 +51,10 @@
     "lint": "fixpack && npm run jshint",
     "postversion": "git push --follow-tags",
     "preversion": "npm test",
-    "release:pre": "npm version prerelease && npm publish --tag pre",
-    "release:patch": "npm version patch && npm publish",
-    "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish",
+    "release:minor": "npm version minor && npm publish",
+    "release:patch": "npm version patch && npm publish",
+    "release:pre": "npm version prerelease && npm publish --tag pre",
     "test": "npm run detect-cycle && npm run lint && npm run testee",
     "testee": "testee test/test.html --browsers firefox"
   },
