@@ -28,8 +28,8 @@ module.exports = function fromAttribute (propertyName) {
 				}
 			});
 
-			ctr.prototype.attributeChangedCallback = function (prop, oldVal, newVal) {
-				ctr[metaSymbol]._attributeChangedCallbackHandler[prop].apply(this, arguments)
+			ctr.prototype.attributeChangedCallback = function (prop) {
+				ctr[metaSymbol]._attributeChangedCallbackHandler[prop].apply(this, arguments);
 			};
 
 			ctr[metaSymbol]._hasInitializedAttributeBindings = true;
