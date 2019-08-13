@@ -1,7 +1,12 @@
 const QUnit = require("steal-qunit");
 const fromAttribute = require("./from-attribute");
 
-QUnit.module("can-observable-bindings - from-attribute");
+let fixture;
+QUnit.module("can-observable-bindings - from-attribute", {
+	beforeEach() {
+		fixture = document.querySelector("#qunit-fixture");
+	}
+});
 
 QUnit.test("setting attribute will set property", function (assert) {
 	const attributes = ["fname", "lname", "city"];
@@ -26,7 +31,8 @@ QUnit.test("setting attribute will set property", function (assert) {
 	};
 	
 	customElements.define("my-el", MyEl);
-	const el = new MyEl();
+	const el = document.createElement("my-el");
+	fixture.appendChild(el);
 
 	bindings.forEach(bindFn => {
 		const binding = bindFn(el);
@@ -60,38 +66,13 @@ QUnit.test("Does not set properties when attributes do not exist", function (ass
 	});
 	
 	customElements.define("my-el-1", MyEl);
-	const el = new MyEl();
-
-	bindings.forEach(bindFn => {
-		const binding = bindFn(el);
-		binding.start();
-	});
-
-	assert.equal(el.fname, undefined, "Setting attribute sets a property");
-});
-
-QUnit.test("Will initialize property when attribute exists", function (assert) {
-	const attributes = ["fname"];
-	const bindings = [];
-	class MyEl extends HTMLElement {
-		static get observedAttributes () {
-			return attributes;
-		}
-	}
-
-	attributes.forEach(attribute => {
-		const ctrBinding = fromAttribute(attribute);
-		bindings.push(ctrBinding(MyEl));
-	});
+	const el = document.createElement("my-el-1");
+	fixture.appendChild(el);
 	
-	customElements.define("my-el-2", MyEl);
-	const el = new MyEl();
-	el.setAttribute("fname", "Matt");
-
 	bindings.forEach(bindFn => {
 		const binding = bindFn(el);
 		binding.start();
 	});
 
-	assert.equal(el.fname, "Matt", "Sets property on initialization");
+	assert.strictEqual(el.fname, undefined, "Property not set");
 });

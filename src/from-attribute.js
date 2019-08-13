@@ -48,14 +48,12 @@ module.exports = function fromAttribute (propertyName) {
 			// Child binding used by `attributeChangedCallback` to update the value when an attribute change occurs 
 			const childValue = value.to(instance, propertyName);
 			const bind = new Bind({
-				parent: value.from(instance.getAttribute(propertyName)),
+				parent: value.from(instance.getAttribute(propertyName) || undefined),
 				child: childValue,
 				queue: "dom",
-				setChild (newVal) {
-					// During initialization prevent update of child when parent attribute does not exist
-					if (instance.hasAttribute(propertyName)) {
-						canReflect.setValue(childValue, newVal);
-					}
+				setChild () {
+					// During initialization prevent update of child
+					// Initial value is read during initialization
 				}
 			});
 
