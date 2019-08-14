@@ -14,12 +14,14 @@
   "dependencies": {
     "can-bind": "^1.5.1",
     "can-reflect": "^1.17.11",
+    "can-string": "^1.1.0",
     "can-value": "^1.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
+    "can-observation": "^4.2.0",
     "detect-cyclic-packages": "^1.1.0",
     "fixpack": "^2.3.1",
     "jshint": "^2.9.1",
@@ -32,17 +34,15 @@
     "CanJS"
   ],
   "license": "MIT",
-  "main": "dist/can-observable-bindings.js",
-  "module": "src/can-observable-bindings.js",
+  "main": "can-observable-bindings.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/canjs/can-observable-bindings.git"
   },
   "scripts": {
-    "ci": "npm run test && npm run compile-to-es5",
-    "compile-to-es5": "babel src --out-dir dist",
+    "ci": "npm run test",
     "detect-cycle": "detect-cyclic-packages",
-    "jshint": "jshint src/*.js test/*.js --config",
+    "jshint": "jshint ./*.js --config",
     "lint": "fixpack && npm run jshint",
     "postversion": "git push --follow-tags",
     "preversion": "npm test",
@@ -51,9 +51,9 @@
     "release:patch": "npm version patch && npm publish",
     "release:pre": "npm version prerelease && npm publish --tag pre",
     "test": "npm run detect-cycle && npm run lint && npm run testee",
-    "testee": "testee test/test.html --browsers firefox"
+    "testee": "testee ./test.html --browsers firefox"
   },
   "steal": {
-    "main": "src/can-observable-bindings.js"
+    "main": "can-observable-bindings.js"
   }
 }
