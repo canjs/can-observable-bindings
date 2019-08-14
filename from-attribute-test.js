@@ -19,8 +19,7 @@ QUnit.test("setting attribute will set property", function (assert) {
 	}
 
 	attributes.forEach(attribute => {
-		const ctrBinding = fromAttribute(attribute);
-		bindings.push(ctrBinding(MyEl));
+		bindings.push(fromAttribute(attribute, MyEl));
 	});
 	
 	// Overwrite the attributeChangedCallback to check we only get called twice
@@ -61,8 +60,7 @@ QUnit.test("Does not set properties when attributes do not exist", function (ass
 	}
 
 	attributes.forEach(attribute => {
-		const ctrBinding = fromAttribute(attribute);
-		bindings.push(ctrBinding(MyEl));
+		bindings.push(fromAttribute(attribute, MyEl));
 	});
 	
 	customElements.define("my-el-1", MyEl);
@@ -75,4 +73,59 @@ QUnit.test("Does not set properties when attributes do not exist", function (ass
 	});
 
 	assert.strictEqual(el.fname, undefined, "Property not set");
+});
+
+QUnit.test("Can pass a custom prop name", function (assert) {
+	const attributes = ["fname"];
+	const bindings = [];
+	class MyEl extends HTMLElement {
+		static get observedAttributes () {
+			return ['my-prop'];
+		}
+	}
+
+	attributes.forEach(attribute => {
+		const makeFromAttribute = fromAttribute('my-prop');
+		bindings.push(makeFromAttribute(attribute, MyEl));
+	});
+	
+	customElements.define("my-el-2", MyEl);
+	const el = document.createElement("my-el-2");
+	fixture.appendChild(el);
+	
+	bindings.forEach(bindFn => {
+		const binding = bindFn(el);
+		binding.start();
+	});
+
+	// Set custom attribute name, which is different to the prop name
+	el.setAttribute('my-prop', "Matt")
+	assert.strictEqual(el.fname, "Matt", "Property is set");
+});
+
+QUnit.test("Can handle camelCase props", function (assert) {
+	const attributes = ["firstName"];
+	const bindings = [];
+	class MyEl extends HTMLElement {
+		static get observedAttributes () {
+			return attributes;
+		}
+	}
+
+	attributes.forEach(attribute => {
+		bindings.push(fromAttribute(attribute, MyEl));
+	});
+	
+	customElements.define("my-el-3", MyEl);
+	const el = document.createElement("my-el-3");
+	fixture.appendChild(el);
+	
+	bindings.forEach(bindFn => {
+		const binding = bindFn(el);
+		binding.start();
+	});
+
+	// Set custom attribute name, which is different to the prop name
+	el.setAttribute('first-name', "Matt")
+	assert.strictEqual(el.firstName, "Matt", "Property is set");
 });

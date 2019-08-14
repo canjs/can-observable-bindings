@@ -3,7 +3,7 @@
 
 @description Create a property and attribute binding on a `StacheElement`.
 
-@signature `fromAttribute("propertyName")(HTMLElement)`
+@signature `fromAttribute`
 
   Using `fromAttribute` will set up attribute and property bindings for a `StacheElement`:
 
