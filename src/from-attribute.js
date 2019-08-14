@@ -51,10 +51,8 @@ module.exports = function fromAttribute (propertyName) {
 				parent: value.from(instance.getAttribute(propertyName) || undefined),
 				child: childValue,
 				queue: "dom",
-				setChild () {
-					// During initialization prevent update of child
-					// Initial value is read during initialization
-				}
+				// During initialization prevent update of child
+				onInitDoNotUpdateChild: true
 			});
 
 			if (instance[metaSymbol] === undefined) {
