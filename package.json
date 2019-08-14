@@ -42,7 +42,7 @@
   "scripts": {
     "ci": "npm run test",
     "detect-cycle": "detect-cyclic-packages",
-    "jshint": "jshint src/*.js test/*.js --config",
+    "jshint": "jshint ./*.js --config",
     "lint": "fixpack && npm run jshint",
     "postversion": "git push --follow-tags",
     "preversion": "npm test",
@@ -51,7 +51,7 @@
     "release:patch": "npm version patch && npm publish",
     "release:pre": "npm version prerelease && npm publish --tag pre",
     "test": "npm run detect-cycle && npm run lint && npm run testee",
-    "testee": "testee test/test.html --browsers firefox"
+    "testee": "testee ./test.html --browsers firefox"
   },
   "steal": {
     "main": "can-observable-bindings.js"

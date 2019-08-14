@@ -99,7 +99,7 @@ QUnit.test("Can pass a custom prop name", function (assert) {
 	});
 
 	// Set custom attribute name, which is different to the prop name
-	el.setAttribute('my-prop', "Matt")
+	el.setAttribute('my-prop', "Matt");
 	assert.strictEqual(el.fname, "Matt", "Property is set");
 });
 
@@ -126,6 +126,6 @@ QUnit.test("Can handle camelCase props", function (assert) {
 	});
 
 	// Set custom attribute name, which is different to the prop name
-	el.setAttribute('first-name', "Matt")
+	el.setAttribute('first-name', "Matt");
 	assert.strictEqual(el.firstName, "Matt", "Property is set");
 });

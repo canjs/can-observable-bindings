@@ -11,20 +11,6 @@ if(process.env.NODE_ENV !== 'production') {
 
 const metaSymbol = Symbol.for("can.meta");
 
-// fromAttribute('attribute-name') //-> will t
-// fromAttribute
-
-module.exports = function fromAttribute (attributeName, ctr) {
-	// Handle the class constructor
-	if (arguments.length === 2) {
-		return initializeFromAttribute(attributeName, ctr)
-	} else {
-		return function (propertyName, ctr) {
-			return initializeFromAttribute(propertyName, ctr, attributeName)
-		}
-	}
-};
-
 function initializeFromAttribute (propertyName, ctr, attributeName) {
 	if (ctr[metaSymbol] === undefined) {
 		ctr[metaSymbol] = {};
@@ -119,4 +105,15 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 
 		return bind;
 	};
+}
+
+module.exports = function fromAttribute (attributeName, ctr) {
+	// Handle the class constructor
+	if (arguments.length === 2) {
+		return initializeFromAttribute(attributeName, ctr);
+	} else {
+		return function (propertyName, ctr) {
+			return initializeFromAttribute(propertyName, ctr, attributeName);
+		};
+	}
 };
