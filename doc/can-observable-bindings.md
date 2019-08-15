@@ -6,4 +6,4 @@
  Create observable bindings on StacheElement attributes.
 
 @option {Object} An object with the methods:
-[can-observable-bindings.fromAttribute].
+[can-observable-bindings/fromAttribute].
