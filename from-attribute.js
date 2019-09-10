@@ -2,6 +2,7 @@ const value = require("can-value");
 const Bind = require("can-bind");
 const canReflect = require("can-reflect");
 const canString = require("can-string");
+const type = require("can-type");
 
 //!steal-remove-start
 if(process.env.NODE_ENV !== 'production') {
@@ -31,7 +32,7 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 
 	// Modify the class prototype here
 	if (!ctr[metaSymbol]._hasInitializedAttributeBindings) {
-		// Set up the static getter for `observedAttributes`			
+		// Set up the static getter for `observedAttributes`
 		Object.defineProperty(ctr, "observedAttributes", {
 			get() {
 				return ctr[metaSymbol]._observedAttributes;
@@ -54,9 +55,30 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 		}
 	};
 
+	var lazyGetType = function() {
+		var Type;
+		var schema = canReflect.getSchema(ctr);
+		if(schema) {
+			Type = schema.keys[propertyName];
+		}
+		if(!Type) {
+			Type = type.Any;
+		}
+		Type = type.convert(Type);
+		lazyGetType = function() { return Type; };
+		return Type;
+	};
+
 	return function fromAttributeBind (instance) {
-		// Child binding used by `attributeChangedCallback` to update the value when an attribute change occurs 
+		// Child binding used by `attributeChangedCallback` to update the value when an attribute change occurs
 		const childValue = value.to(instance, propertyName);
+		const intermediateValue = {};
+		canReflect.assignSymbols(intermediateValue, {
+			"can.setValue": function(value) {
+				var converted = canReflect.convert(value, lazyGetType());
+				canReflect.setValue(childValue, converted);
+			}
+		});
 		const parentValue = value.from(instance.getAttribute(attributeName) || undefined);
 		//!steal-remove-start
 		if(process.env.NODE_ENV !== 'production') {
@@ -87,7 +109,7 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 		//!steal-remove-end
 		const bind = new Bind({
 			parent: parentValue,
-			child: childValue,
+			child: intermediateValue,
 			queue: "dom",
 			// During initialization prevent update of child
 			onInitDoNotUpdateChild: true
@@ -101,7 +123,7 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 		}
 
 		// Push binding so it can be used within `attributeChangedCallback`
-		instance[metaSymbol]._attributeBindings[attributeName] = childValue;
+		instance[metaSymbol]._attributeBindings[attributeName] = intermediateValue;
 
 		return bind;
 	};
