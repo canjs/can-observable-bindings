@@ -11,7 +11,7 @@
   <my-el name="Matt"></my-el>
 
   <script type="module">
-  import { StacheElement, fromAttribute } from "can/everything";
+  import { fromAttribute, StacheElement } from "can";
 
   class MyElement extends StacheElement {
 	  static view = `
