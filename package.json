@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "can-bind": "^1.5.1",
+    "can-namespace": "^1.0.0",
     "can-reflect": "^1.17.11",
     "can-string": "^1.1.0",
     "can-type": "^1.0.0-pre.5",
