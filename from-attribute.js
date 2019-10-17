@@ -150,14 +150,12 @@ module.exports = function fromAttribute (attributeName, ctr) {
 	// Handle the class constructor
 	if (arguments.length === 2 && !isJSONLike(ctr)) {
 		return initializeFromAttribute(attributeName, ctr);
-	} else if (ctr && isJSONLike(ctr)) {
-		// Handle attribute name is passed with JSON like object
-		var converter = ctr;
-		return function (propertyName, ctr) {
-			return initializeFromAttribute(propertyName, ctr, converter);
-		};
-
 	} else {
+		if (ctr && isJSONLike(ctr)) {
+			// Handle the case where an attribute name 
+			// and JSON like converter is passed
+			attributeName = ctr;
+		}
 		return function (propertyName, ctr) {
 			return initializeFromAttribute(propertyName, ctr, attributeName);
 		};
