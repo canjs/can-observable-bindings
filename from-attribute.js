@@ -12,7 +12,15 @@ if(process.env.NODE_ENV !== 'production') {
 
 const metaSymbol = Symbol.for("can.meta");
 
+function isJSONLike (obj) {
+	return (canReflect.isFunctionLike(obj.parse) && 
+			canReflect.isFunctionLike(obj.stringify));
+}
+
 function initializeFromAttribute (propertyName, ctr, attributeName) {
+	// The JSON like converter
+	var converter;
+
 	if (ctr[metaSymbol] === undefined) {
 		ctr[metaSymbol] = {};
 	}
@@ -24,7 +32,12 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 	if (ctr[metaSymbol]._attributeChangedCallbackHandler === undefined) {
 		ctr[metaSymbol]._attributeChangedCallbackHandler = {};
 	}
-	if (attributeName === undefined) {
+	if (typeof attributeName === 'object') {
+		if (isJSONLike(attributeName)) {
+			converter = attributeName;
+		}
+	} 
+	if (attributeName === undefined || typeof attributeName === 'object') {
 		attributeName = propertyName;
 	}
 	// Ensure the attributeName is hyphen case
@@ -75,11 +88,15 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 		const intermediateValue = {};
 		canReflect.assignSymbols(intermediateValue, {
 			"can.setValue": function(value) {
+				if (converter) {
+					value = converter.parse(value);
+				}
 				var converted = canReflect.convert(value, lazyGetType());
 				canReflect.setValue(childValue, converted);
 			}
 		});
 		const parentValue = value.from(instance.getAttribute(attributeName) || undefined);
+	
 		//!steal-remove-start
 		if(process.env.NODE_ENV !== 'production') {
 			// Ensure pretty names for dep graph
@@ -131,8 +148,15 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 
 module.exports = function fromAttribute (attributeName, ctr) {
 	// Handle the class constructor
-	if (arguments.length === 2) {
+	if (arguments.length === 2 && !isJSONLike(ctr)) {
 		return initializeFromAttribute(attributeName, ctr);
+	} else if (ctr && isJSONLike(ctr)) {
+		// Handle attribute name is passed with JSON like object
+		var converter = ctr;
+		return function (propertyName, ctr) {
+			return initializeFromAttribute(propertyName, ctr, converter);
+		};
+
 	} else {
 		return function (propertyName, ctr) {
 			return initializeFromAttribute(propertyName, ctr, attributeName);
