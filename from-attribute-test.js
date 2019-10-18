@@ -168,4 +168,115 @@ if (browserSupports.customElements) {
 
 		assert.strictEqual(el.age, 13, "Property is converted");
 	});
+
+	QUnit.test("Can pass a converter", function(assert) {
+		const attributes = ['info'];
+		const bindings = [];
+
+		class MyEl extends HTMLElement {
+			static get observedAttributes() {
+				return attributes;
+			}
+		}
+
+		attributes.forEach(attribute => {
+			const makeFromAttribute = fromAttribute(JSON);
+			bindings.push(makeFromAttribute(attribute,MyEl));
+		});
+
+		customElements.define('my-el-4', MyEl);
+		const el = document.createElement('my-el-4');
+		fixture.appendChild(el);
+
+		fixture.appendChild(el);
+
+		bindings.forEach(bindFn => {
+			const binding = bindFn(el);
+			binding.start();
+		});
+
+		el.setAttribute('info', '{"foo": "bar"}');
+		assert.deepEqual(el.info, {foo: "bar"}, "JSON is converted to object");
+	});
+
+	QUnit.test("Can pass an attribute name and a converter", function(assert) {
+		const attributes = ['info'];
+		const bindings = [];
+
+		class MyEl extends HTMLElement {
+			static get observedAttributes() {
+				return attributes;
+			}
+		}
+
+		attributes.forEach(attribute => {
+			const makeFromAttribute = fromAttribute(attribute, JSON);
+			bindings.push(makeFromAttribute(attribute, MyEl));
+		});
+
+		customElements.define('my-el-5', MyEl);
+		const el = document.createElement('my-el-5');
+		fixture.appendChild(el);
+
+		fixture.appendChild(el);
+
+		bindings.forEach(bindFn => {
+			const binding = bindFn(el);
+			binding.start();
+		});
+
+		el.setAttribute('info', '{"foo": "bar"}');
+		assert.deepEqual(el.info, {foo: "bar"}, "JSON is converted to object");
+	});
+
+	QUnit.test("Throws an error when the converter is not valid", function(assert) {
+		const attributes = ['info'];
+		const bindings = [];
+
+		class MyEl extends HTMLElement {
+			static get observedAttributes() {
+				return attributes;
+			}
+		}
+
+		attributes.forEach(attribute => {
+			try {
+				const makeFromAttribute = fromAttribute(attribute, {});
+				bindings.push(makeFromAttribute(attribute, MyEl));
+				assert.ok(true);
+			} catch (e) {
+				assert.ok(true, 'Throws when the wrong object converter is passed');
+			}
+		});
+	});
+
+	QUnit.test("Works correctly if attribute is different from the attribute passed in setAttribute.", function(assert) {
+		const attributes = ['info'];
+		const bindings = [];
+
+		class MyEl extends HTMLElement {
+			static get observedAttributes() {
+				return ['my-attr'];
+			}
+		}
+
+		attributes.forEach(attribute => {
+			const makeFromAttribute = fromAttribute('my-attr', JSON);
+			bindings.push(makeFromAttribute(attribute, MyEl));
+		});
+
+		customElements.define('my-el-6', MyEl);
+		const el = document.createElement('my-el-6');
+		fixture.appendChild(el);
+
+		fixture.appendChild(el);
+
+		bindings.forEach(bindFn => {
+			const binding = bindFn(el);
+			binding.start();
+		});
+
+		el.setAttribute('my-attr', '{"foo": "bar"}');
+		assert.deepEqual(el.info, {foo: "bar"}, "JSON is converted to object");
+	});
 }

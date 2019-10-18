@@ -12,7 +12,12 @@ if(process.env.NODE_ENV !== 'production') {
 
 const metaSymbol = Symbol.for("can.meta");
 
-function initializeFromAttribute (propertyName, ctr, attributeName) {
+function isJSONLike (obj) {
+	return (canReflect.isFunctionLike(obj.parse) && 
+			canReflect.isFunctionLike(obj.stringify));
+}
+
+function initializeFromAttribute (propertyName, ctr, converter, attributeName) {
 	if (ctr[metaSymbol] === undefined) {
 		ctr[metaSymbol] = {};
 	}
@@ -24,6 +29,7 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 	if (ctr[metaSymbol]._attributeChangedCallbackHandler === undefined) {
 		ctr[metaSymbol]._attributeChangedCallbackHandler = {};
 	}
+	
 	if (attributeName === undefined) {
 		attributeName = propertyName;
 	}
@@ -75,11 +81,15 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 		const intermediateValue = {};
 		canReflect.assignSymbols(intermediateValue, {
 			"can.setValue": function(value) {
+				if (converter) {
+					value = converter.parse(value);
+				}
 				var converted = canReflect.convert(value, lazyGetType());
 				canReflect.setValue(childValue, converted);
 			}
 		});
 		const parentValue = value.from(instance.getAttribute(attributeName) || undefined);
+	
 		//!steal-remove-start
 		if(process.env.NODE_ENV !== 'production') {
 			// Ensure pretty names for dep graph
@@ -130,12 +140,28 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 }
 
 module.exports = function fromAttribute (attributeName, ctr) {
+	var converter;
 	// Handle the class constructor
-	if (arguments.length === 2) {
+	if (arguments.length === 2 && canReflect.isConstructorLike(ctr) && !isJSONLike(ctr)) {
 		return initializeFromAttribute(attributeName, ctr);
-	} else {
-		return function (propertyName, ctr) {
-			return initializeFromAttribute(propertyName, ctr, attributeName);
-		};
+	} else if (arguments.length === 1 && typeof attributeName === 'object') {
+		// Handle fromAttribute(JSON)
+		converter = attributeName;
+		attributeName = undefined;
+	} else if (typeof ctr === 'object' && isJSONLike(ctr)) {
+		// Handle the case where an attribute name 
+		// and JSON like converter is passed
+		// fromAttribute('attr', JSON)
+		converter = ctr;
 	}
+	//!steal-remove-start
+	if(process.env.NODE_ENV !== 'production') {
+		if (converter && !isJSONLike(converter)) {	
+			throw new Error('The passed converter object is wrong! The object must have "parse" and "stringify" methods!');
+		}
+	}
+	//!steal-remove-end
+	return function (propertyName, ctr) {
+		return initializeFromAttribute(propertyName, ctr, converter, attributeName);
+	};
 };
