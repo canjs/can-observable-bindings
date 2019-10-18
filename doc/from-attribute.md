@@ -34,7 +34,7 @@ For creating bindings on a `StacheElement` for attributes and properties. If you
 
 ## Pass Conversion object
 
-It is possible to pass a conversion object for attributes that need to be paresd before setting the property, the passed object can be `JSON` object or anything implements `parse` and `stringify` methods:
+It is possible to pass a conversion object for attributes that need to be parsed before setting the property, the passed object can be any object that has `parse` and `stringify` functions, such as the global [JSON object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON).
 
 ```html
 <my-el person="{'firstname': 'Cherif', 'age': 37}"></my-el>

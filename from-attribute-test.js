@@ -2,6 +2,7 @@ const QUnit = require("steal-qunit");
 const fromAttribute = require("./from-attribute");
 const browserSupports = require("./test-helpers").browserSupports;
 const type = require("can-type");
+const dev = require('can-test-helpers').dev;
 
 let fixture;
 QUnit.module("can-observable-bindings - from-attribute", {
@@ -229,7 +230,7 @@ if (browserSupports.customElements) {
 		assert.deepEqual(el.info, {foo: "bar"}, "JSON is converted to object");
 	});
 
-	QUnit.test("Throws an error when the converter is not valid", function(assert) {
+	dev.devOnlyTest("Throws an error when the converter is not valid", function(assert) {
 		const attributes = ['info'];
 		const bindings = [];
 
