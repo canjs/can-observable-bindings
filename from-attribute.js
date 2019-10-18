@@ -17,10 +17,7 @@ function isJSONLike (obj) {
 			canReflect.isFunctionLike(obj.stringify));
 }
 
-function initializeFromAttribute (propertyName, ctr, attributeName) {
-	// The JSON like converter
-	var converter;
-
+function initializeFromAttribute (propertyName, ctr, converter, attributeName) {
 	if (ctr[metaSymbol] === undefined) {
 		ctr[metaSymbol] = {};
 	}
@@ -32,12 +29,8 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 	if (ctr[metaSymbol]._attributeChangedCallbackHandler === undefined) {
 		ctr[metaSymbol]._attributeChangedCallbackHandler = {};
 	}
-	if (typeof attributeName === 'object') {
-		if (isJSONLike(attributeName)) {
-			converter = attributeName;
-		}
-	} 
-	if (attributeName === undefined || typeof attributeName === 'object') {
+	
+	if (attributeName === undefined) {
 		attributeName = propertyName;
 	}
 	// Ensure the attributeName is hyphen case
@@ -147,17 +140,28 @@ function initializeFromAttribute (propertyName, ctr, attributeName) {
 }
 
 module.exports = function fromAttribute (attributeName, ctr) {
+	var converter;
 	// Handle the class constructor
-	if (arguments.length === 2 && !isJSONLike(ctr)) {
+	if (arguments.length === 2 && canReflect.isConstructorLike(ctr) && !isJSONLike(ctr)) {
 		return initializeFromAttribute(attributeName, ctr);
-	} else {
-		if (ctr && isJSONLike(ctr)) {
-			// Handle the case where an attribute name 
-			// and JSON like converter is passed
-			attributeName = ctr;
-		}
-		return function (propertyName, ctr) {
-			return initializeFromAttribute(propertyName, ctr, attributeName);
-		};
+	} else if (arguments.length === 1 && typeof attributeName === 'object') {
+		// Handle fromAttribute(JSON)
+		converter = attributeName;
+		attributeName = undefined;
+	} else if (typeof ctr === 'object' && isJSONLike(ctr)) {
+		// Handle the case where an attribute name 
+		// and JSON like converter is passed
+		// fromAttribute('attr', JSON)
+		converter = ctr;
 	}
+	//!steal-remove-start
+	if(process.env.NODE_ENV !== 'production') {
+		if (converter && !isJSONLike(converter)) {	
+			throw new Error('The passed converter object is wrong! The object must have "parse" and "stringify" methods!');
+		}
+	}
+	//!steal-remove-end
+	return function (propertyName, ctr) {
+		return initializeFromAttribute(propertyName, ctr, converter, attributeName);
+	};
 };
