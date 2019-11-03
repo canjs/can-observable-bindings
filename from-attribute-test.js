@@ -269,8 +269,6 @@ if (browserSupports.customElements) {
 		const el = document.createElement('my-el-6');
 		fixture.appendChild(el);
 
-		fixture.appendChild(el);
-
 		bindings.forEach(bindFn => {
 			const binding = bindFn(el);
 			binding.start();
@@ -278,5 +276,37 @@ if (browserSupports.customElements) {
 
 		el.setAttribute('my-attr', '{"foo": "bar"}');
 		assert.deepEqual(el.info, {foo: "bar"}, "JSON is converted to object");
+	});
+
+	QUnit.test("fromAttribute does not initialize with converted value (#18)", function(assert){
+
+		const attributes = ['info'];
+		const bindings = [];
+
+		class MyEl extends HTMLElement {
+			static get observedAttributes() {
+				return ['my-attr'];
+			}
+		}
+
+		attributes.forEach(attribute => {
+			const makeFromAttribute = fromAttribute('my-attr', JSON);
+			bindings.push(makeFromAttribute(attribute, MyEl));
+		});
+
+		customElements.define('my-el-7', MyEl);
+		const el = document.createElement('my-el-7');
+
+		el.setAttribute("my-attr","5");
+
+		fixture.appendChild(el);
+
+		bindings.forEach(bindFn => {
+			const binding = bindFn(el);
+			binding.startParent();
+			assert.strictEqual(binding.parent.value, 5, "initial value run through parser");
+		});
+
+
 	});
 }
