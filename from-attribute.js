@@ -13,7 +13,7 @@ if(process.env.NODE_ENV !== 'production') {
 const metaSymbol = Symbol.for("can.meta");
 
 function isJSONLike (obj) {
-	return (canReflect.isFunctionLike(obj.parse) && 
+	return (canReflect.isFunctionLike(obj.parse) &&
 			canReflect.isFunctionLike(obj.stringify));
 }
 
@@ -29,7 +29,7 @@ function initializeFromAttribute (propertyName, ctr, converter, attributeName) {
 	if (ctr[metaSymbol]._attributeChangedCallbackHandler === undefined) {
 		ctr[metaSymbol]._attributeChangedCallbackHandler = {};
 	}
-	
+
 	if (attributeName === undefined) {
 		attributeName = propertyName;
 	}
@@ -74,6 +74,12 @@ function initializeFromAttribute (propertyName, ctr, converter, attributeName) {
 		lazyGetType = function() { return Type; };
 		return Type;
 	};
+	function convertToValue(value) {
+		if (converter) {
+			value = converter.parse(value);
+		}
+		return canReflect.convert(value, lazyGetType());
+	}
 
 	return function fromAttributeBind (instance) {
 		// Child binding used by `attributeChangedCallback` to update the value when an attribute change occurs
@@ -81,15 +87,11 @@ function initializeFromAttribute (propertyName, ctr, converter, attributeName) {
 		const intermediateValue = {};
 		canReflect.assignSymbols(intermediateValue, {
 			"can.setValue": function(value) {
-				if (converter) {
-					value = converter.parse(value);
-				}
-				var converted = canReflect.convert(value, lazyGetType());
-				canReflect.setValue(childValue, converted);
+				canReflect.setValue(childValue, convertToValue(value) );
 			}
 		});
-		const parentValue = value.from(instance.getAttribute(attributeName) || undefined);
-	
+		const parentValue = value.from(instance.hasAttribute(attributeName) ?  convertToValue(instance.getAttribute(attributeName)) : undefined);
+
 		//!steal-remove-start
 		if(process.env.NODE_ENV !== 'production') {
 			// Ensure pretty names for dep graph
@@ -149,14 +151,14 @@ module.exports = function fromAttribute (attributeName, ctr) {
 		converter = attributeName;
 		attributeName = undefined;
 	} else if (typeof ctr === 'object' && isJSONLike(ctr)) {
-		// Handle the case where an attribute name 
+		// Handle the case where an attribute name
 		// and JSON like converter is passed
 		// fromAttribute('attr', JSON)
 		converter = ctr;
 	}
 	//!steal-remove-start
 	if(process.env.NODE_ENV !== 'production') {
-		if (converter && !isJSONLike(converter)) {	
+		if (converter && !isJSONLike(converter)) {
 			throw new Error('The passed converter object is wrong! The object must have "parse" and "stringify" methods!');
 		}
 	}
